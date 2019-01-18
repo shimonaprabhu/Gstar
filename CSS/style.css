@@ -1,0 +1,153 @@
+#background{
+	background-color: rgba(244,244,244,1.0);
+	text-align: center;
+	width: 100%;
+}
+
+#button {
+	background-color: rgba(55,55,55,0.5);
+	color: rgba(244,244,244,1.0);
+}
+
+#main{
+	display: inline-block;
+	width: 75%;
+	/*margin-left: 12%;
+	margin-top: 5%;*/
+    color: rgba(244,244,244,1.0);
+	background-color: rgba(136,136,136 ,0.5);
+	padding: 80px;
+	border-radius: 25px;
+	margin-top: 20%;
+}
+
+#loginmain{
+	display: inline-block;
+	min-width: 40%;
+	/*margin-left: 20%;
+	margin-top: 5%;*/
+    color: rgba(244,244,244,1.0);
+	background-color: rgba(136,136,136 ,0.5);
+	padding: 10px;
+	border-radius: 25px;
+	margin-top: 3%;	
+}
+
+#detailsmain{
+	display: inline-block;
+	min-width: 75%;
+	/*margin-left: 20%;
+	margin-top: 5%;*/
+    color: rgba(244,244,244,1.0);
+	background-color: rgba(136,136,136 ,0.5);
+	border-radius: 25px;
+	margin-top: 5%;	
+}
+
+#form-center{
+	display: inline-block;
+	width: 50%;
+}
+
+#admin-cont{
+	margin: 0px;
+}
+
+#side-bar-admin{
+	padding: 0px;
+}
+
+#menu-admin{
+	height: 100%;
+	position: fixed;
+	padding-top: 2%;
+}
+
+#delbutton{
+	background-color: rgba(244,244,244,1.0);
+}
+
+#logout{
+	visibility: hidden;
+}
+
+#top{
+		background-color: rgba(0, 35, 52,1.0);
+}
+
+#item{
+	padding: 10px;
+	display:block;
+}
+
+#query{
+	margin: 10px;
+	background-color: rgba(233,236,239,1.0);
+}
+
+#unstyled-list{
+	list-style: none;
+	text-align: left;
+	padding: 40px;
+
+}
+
+#unstyled-list-solution{
+	list-style: none;
+	text-align: left;
+	padding: 0px;
+}
+
+.row a, #dropdown{
+	color: black;
+	padding-bottom: 10%;
+	padding-top: 10%;/*
+	border-bottom: 2px solid black;*/
+}
+
+.row a:hover{
+	color: black;
+	text-decoration: none;
+}
+
+.navbar{
+	background-color: rgba(116,175,173,1.0);
+	/*margin-bottom: 50px;*/
+
+}
+
+.nav{
+	color: rgba(244,244,244,1.0);
+}
+
+.nav:hover{
+	color: rgba(244,244,244,1.0);
+}
+
+.display{
+	font-size: 2rem;
+    font-weight: 300;
+}
+
+.header{
+	position: fixed;
+}
+
+.footer{
+	font-size: 12px;
+	background-color: rgba(105, 124, 129,1.0);
+	color: rgba(244,244,244,1.0);
+  	position: fixed;
+  	left: 0;
+  	bottom: 0;
+  	width: 100%;
+  	text-align: center;
+}
+
+.heading{
+	font-weight: bold;
+}
+
+td,th{
+	padding: 20px;
+}

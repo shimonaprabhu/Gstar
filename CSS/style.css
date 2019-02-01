@@ -9,38 +9,35 @@
 	color: rgba(244,244,244,1.0);
 }
 
+#buttoncom {
+	background-color: rgba(55,55,55,0.5);
+	color: rgba(244,244,244,1.0);
+	margin-left: 10%;
+}
+
 #main{
 	display: inline-block;
 	width: 75%;
-	/*margin-left: 12%;
-	margin-top: 5%;*/
     color: rgba(244,244,244,1.0);
 	background-color: rgba(136,136,136 ,0.5);
 	padding: 80px;
-	border-radius: 25px;
-	margin-top: 20%;
+	margin-top: 15%;
 }
 
 #loginmain{
 	display: inline-block;
 	min-width: 40%;
-	/*margin-left: 20%;
-	margin-top: 5%;*/
     color: rgba(244,244,244,1.0);
 	background-color: rgba(136,136,136 ,0.5);
 	padding: 10px;
-	border-radius: 25px;
 	margin-top: 3%;	
 }
 
 #detailsmain{
 	display: inline-block;
 	min-width: 75%;
-	/*margin-left: 20%;
-	margin-top: 5%;*/
     color: rgba(244,244,244,1.0);
 	background-color: rgba(136,136,136 ,0.5);
-	border-radius: 25px;
 	margin-top: 5%;	
 }
 
@@ -72,11 +69,15 @@
 }
 
 #top{
-		background-color: rgba(0, 35, 52,1.0);
+	background-color: rgba(0, 35, 52,1.0);
 }
 
 #item{
 	padding: 10px;
+	display:block;
+}
+
+#itemreg{
 	display:block;
 }
 
@@ -98,11 +99,28 @@
 	padding: 0px;
 }
 
+#accordioncard{
+	min-width: 75%;
+}
+
+#search{
+	margin-left: 23%;
+}
+
+#user{
+	background-color: rgba(116,175,173,1.0);
+	color: white;
+}
+
+
+#verified{
+	color: white;
+}
+
 .row a, #dropdown{
 	color: black;
 	padding-bottom: 10%;
-	padding-top: 10%;/*
-	border-bottom: 2px solid black;*/
+	padding-top: 10%;
 }
 
 .row a:hover{
@@ -112,7 +130,6 @@
 
 .navbar{
 	background-color: rgba(116,175,173,1.0);
-	/*margin-bottom: 50px;*/
 
 }
 

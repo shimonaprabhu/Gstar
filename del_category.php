@@ -15,7 +15,8 @@
 		$delcat=$_POST['delcat'];
 		$query4 = "SELECT cat_id from category where cat_name='$delcat'";
 		$result4 = mysqli_query($conn, $query4);
-	  	$row4 = mysqli_fetch_assoc($result4);$cat_id=$row4['cat_id'];
+	  	$row4 = mysqli_fetch_assoc($result4);
+	  	$cat_id=$row4['cat_id'];
 	  	$resa=mysqli_affected_rows($conn);
 		$resb=mysqli_error($conn);
 		if(!empty($resb)){ ?>
@@ -38,32 +39,20 @@
 			else {
 				$query3 = "DELETE FROM queries WHERE cat_id='$cat_id'";
 				$result3 = mysqli_query($conn, $query3);
-				$resa=mysqli_affected_rows($conn);
-				$resb=mysqli_error($conn);
-				if(!empty($resb)){ ?>
-					<script> errordisp("<?=$resb;?>");</script>
-				<?php }
-				else if(empty($resa)) { ?>
-					<script> errordisp("No queries in this category available in database!");</script>
-				<?php }
-				else {
-					$query2 = "DELETE FROM comments WHERE cat_id='$cat_id'";
-					$result2 = mysqli_query($conn, $query2);
-					$resa=mysqli_affected_rows($conn);
-					$resb=mysqli_error($conn);
-					if(!empty($resb)){ ?>
-						<script> errordisp("<?=$resb;?>");</script>
-					<?php }
-					else if(empty($resa)) { ?>
-						<script> errordisp("No comments in this category data available in database!");</script>
-					<?php }
-					else { ?>
-						<script> location.replace("del_category.php"); </script>
-					<?php }
+				$query2 = "DELETE FROM comments WHERE cat_id='$cat_id'";
+				$result2 = mysqli_query($conn, $query2);
+				$query2 = "SELECT file_name FROM files WHERE cat_id='$cat_id'";
+				$result2 = mysqli_query($conn, $query2);
+				while($r = mysqli_fetch_assoc($result2)) { 
+					$filenm=$r['file_name'];
+					unlink('Files/'.$filenm);
 				}
+				$query2 = "DELETE FROM files WHERE cat_id='$cat_id'";
+				$result2 = mysqli_query($conn, $query2); ?>
+				<!-- <script> location.replace("del_category.php"); </script> -->
+			<?php }
 			}
-		}
-	}	
+		}	
 ?>
 <!--Create a container to show all the available categories that the admin can delete-->
 		<div class="container" id="admin-cont">
@@ -90,15 +79,15 @@
 									<h3 class="display text-center">No categories in database!</h3>
 								<?php }
 								else { ?>
-									<table>
+									<table style="margin-left: 20px;">
 			  							<tr>
-				  							<th></th><th>Category</th>
+				  							<th></th><th></th><th>Category</th>
 				  							<th></th><th>Delete</th>
 				  						</tr>
 				  					<?php
 									while($row = mysqli_fetch_assoc($result)) { ?>
 										<tr>
-				  							<td></td><td><?=$row['cat_name'];?></td>
+				  							<td></td><td></td><td><?=$row['cat_name'];?></td>
 				  							<td></td><td>
 				  								<form action="del_category.php" method="post">
 													<input type="hidden" name="delcat" value="<?=$row['cat_name'];?>">

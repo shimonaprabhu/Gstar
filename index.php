@@ -2,7 +2,8 @@
 	session_start();
 	require_once('header.php');	
 	require_once('operror.php');
-	if ($_SESSION['access']=='error') { ?>
+	if ($_SESSION['access']=='error') { 
+		$_SESSION['access']=''; ?>
   		<script> errordisp("You cannot access this page, please contact admin.");</script>
 	<?php }
 
@@ -71,17 +72,17 @@
 	  			<form action="index.php" method="post">
 					<table>
 							<tr>
-								<td><br><label for="InputUserID">User ID</label></td>
-								<td><br><input type="text" class="form-control" name="InputUserID" placeholder="User ID" size="50"></td>
+								<td><br><label for="InputUserID">User ID<span class="error">*</span></label></td>
+								<td><br><input required type="text" class="form-control" name="InputUserID" placeholder="User ID" size="50"></td>
 							</tr>
 							<tr>
-								<td><label for="InputPassword">Password</label></td>
-								<td><input type="password" class="form-control" name="InputPassword" placeholder="Password" size="50"></td>
+								<td><label for="InputPassword">Password<span class="error">*</span></label></td>
+								<td><input required type="password" class="form-control" name="InputPassword" placeholder="Password" size="50"></td>
 							</tr>
 							<tr>
-								<td><label for="type">Privilege</label></td>
+								<td><label for="type">Privilege<span class="error">*</span></label></td>
 								<td>
-									<select name="type" id="type" class="form-control">
+									<select required name="type" id="type" class="form-control">
 										<option value="" disabled selected hidden>Options</option>
 										<option value="admin">Administrator</option>
 										<option value="regular">Regular User</option>
@@ -89,6 +90,10 @@
 								</td>
 							</tr>
 					</table>
+					<br>
+					<span class="error">* Required Fields</span>
+					<br>
+					<br>
 				   	<div id="btngrp">
 					  <input type="submit" value="Submit" class="btn justify-content-center" id="button">
 				  	</div>

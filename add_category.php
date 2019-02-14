@@ -39,10 +39,15 @@
 					  	<form action="add_category.php" method="post">
 							<div class="form-row" id="form-center">
 						  		<div class="form-group col-lg-12">
-						    		<label for="InputCategory">Category</label>
-						    		<input type="text" class="form-control" name="InputCategory" placeholder="Category">
+						    		<label for="InputCategory">Category<span class="error">*</span></label>
+						    		<input required type="text" class="form-control" name="InputCategory" placeholder="Category">
 						  		</div>
 						  	</div>
+						  	<br>
+							<br>
+							<span class="error">* Required Fields</span>
+							<br>
+							<br>
 						   	<div id="btngrp">
 							  <input type="submit" value="Submit" class="btn justify-content-center" id="button">
 						  	</div>

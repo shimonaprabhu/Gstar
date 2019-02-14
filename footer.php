@@ -12,6 +12,20 @@
 				document.getElementById(id).submit(); 
 				return false;
 			}
+			function refresh(nm) {
+			    $.ajax({
+			        type: 'POST',
+			        url: 'server.php',
+			        data: { text1: nm },
+			        error: function () {
+			        	errordisp("Unsuccessful operation!");
+			      }
+			    });
+			}
+			/*if ( window.history.replaceState ) {
+			  window.history.replaceState( null, null, window.location.href );
+			}*/
+			
 </script>
 	</body>
 </html>

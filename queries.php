@@ -9,9 +9,12 @@
 /*Extract data posted using the form and include the files to make connection to the DB and also include script files. operror is used for displaying error messages*/	
 	require_once('header.php');
 	require_once('operror.php');
-	$cat_name=$_POST['cat'];
-	if (isset($_FILES['files']) && $_POST['type']=='file') { $problem=$_POST['problem'];
-	$cat_name=$_POST['cat_name'];
+	$cat_name=$_SESSION['data'];
+	/*$cat_name=$_POST['cat'];*/
+	if (!empty($_FILES)&&!(array_sum($_FILES['files']['error'])>0) && $_POST['type']=='file') { 
+		$problem=$_POST['problem'];
+		$cat_name=$_POST['cat_name'];
+		$cat_id=$_POST['cat_id'];
 		foreach($_FILES['files']['tmp_name'] as $key => $tmp_name ){
 					$file_name = $_FILES['files']['name'][$key];
 					$file_size =$_FILES['files']['size'][$key];
@@ -21,7 +24,7 @@
 						$result = mysqli_query($conn, $query);
 						$row=mysqli_fetch_assoc($result);
 						$query_id=$row['query_id'];
-				        $query="INSERT into files VALUES('$query_id','$file_name','$file_size','$file_type')";
+				        $query="INSERT into files VALUES('$query_id','$cat_id','$file_name','$file_size','$file_type')";
 				        $result = mysqli_query($conn, $query);
 						$resb=mysqli_error($conn);
 						if(!empty($resb)){ ?>
@@ -30,15 +33,15 @@
 				        $desired_dir="Files";
 				        if(is_dir("$desired_dir/".$file_name)==false){
 				            move_uploaded_file($file_tmp,"Files/".$file_name);
-				        }else{
-				         //rename the file if another one exist
-				            $new_dir="user_data/".$file_name.time();
-				            rename($file_tmp,$new_dir) ;				
-				        }		
+				        }
+				        else { ?>
+							<script> errordisp("File already exists");</script>
+						<?php }		
 				    } ?>
-		<form action="queries.php" method="post" id="catform" onload="sub();">
+				    <script>refresh("<?=$cat_name;?>");</script>
+		<!-- <form action="queries.php" method="post" id="catform" onload="sub();">
 			<input type="hidden" name="cat" value="<?=$cat_name;?>">
-		</form>
+		</form> -->
 	<?php }
 /*If the option entered by the user is to add a solution to an unresolved query and all inputs are available, perform the updation operation on the database, checking for errors, displaying the appropriate error message, else redirecting to the original page after the operation. We need to select the category id based on the category name passed.*/
 	else if(!empty($_POST['soln']) && $_POST['type']=='add') {
@@ -69,9 +72,10 @@
 				<script> errordisp("No data available in database or data already updated!");</script>
 			<?php }
 			else { ?>
-				<form action="queries.php" method="post" id="catform" onload="sub();">
+				<script>refresh("<?=$cat_name;?>");</script>
+				<!-- <form action="queries.php" method="post" id="catform" onload="sub();">
 					<input type="hidden" name="cat" value="<?=$cat_name;?>">
-				</form>
+				</form> -->
 			<?php }	
 		}  	
 	}	
@@ -105,9 +109,10 @@
 				<script> errordisp("No data available in database or data already updated!");</script>
 			<?php }
 			else { ?>
-				<form action="queries.php" method="post" id="catform" onload="sub();">
+				<script>refresh("<?=$cat_name;?>");</script>
+				<!-- <form action="queries.php" method="post" id="catform" onload="sub();">
 					<input type="hidden" name="cat" value="<?=$cat_name;?>">
-				</form>
+				</form> -->
 			<?php }
 		}	      	
 	}
@@ -141,9 +146,10 @@
 				<script> errordisp("No data available in database or data already updated!");</script>
 			<?php }
 			else { ?>
-				<form action="queries.php" method="post" id="catform" onload="sub();">
+				<script>refresh("<?=$cat_name;?>");</script>
+				<!-- <form action="queries.php" method="post" id="catform" onload="sub();">
 					<input type="hidden" name="cat" value="<?=$cat_name;?>">
-				</form>
+				</form> -->
 			<?php }	
 		}      	
 	}
@@ -151,6 +157,7 @@
 /*If the option entered by the user is to verify a comment to either a resolved query or an unresolved query and all inputs are available, perform the updation operation on the database, checking for errors, displaying the appropriate error message, else redirecting to the original page after the operation. We need to set verified variable as 1 in the database for that comment.*/
 
 		else if(!empty($_POST['com_id']) && $_POST['type']=='verify') {
+			$cat_name=$_POST['cat'];
 	    $com_id=$_POST['com_id'];
 	    $query = "UPDATE comments SET verified='1' WHERE com_id='$com_id'";
 		$result = mysqli_query($conn, $query);
@@ -162,16 +169,37 @@
 		else if(empty($resa)) { ?>
 			<script> errordisp("No data available in database or data already updated!");</script>
 		<?php }
-		else { ?>
-			<form action="queries.php" method="post" id="catform" onload="sub();">
+		else { 
+			$query = "SELECT cat_id, query_id, comment, user_id FROM comments WHERE com_id='$com_id'";
+			$result = mysqli_query($conn, $query);
+			$row1 = mysqli_fetch_assoc($result);
+			$com=$row1['comment'];
+			$query_id=$row1['query_id'];
+			$cat_id=$row1['cat_id'];
+			$user_id=$row1['user_id'];
+			$query = "UPDATE queries SET soln=concat(soln,'\nVERIFIED COMMENT BY USER: $user_id\n$com\n') WHERE query_id='$query_id' AND cat_id='$cat_id'";
+			$result = mysqli_query($conn, $query);
+			$resa=mysqli_affected_rows($conn);
+			$resb=mysqli_error($conn);
+			if(!empty($resb)){ ?>
+				<script> errordisp("<?=$resb;?>");</script>
+			<?php }
+			else if(empty($resa)) { ?>
+				<script> errordisp("No data available in database or data already updated!");</script>
+			<?php }	
+			else { ?>
+				<script>refresh("<?=$cat_name;?>");</script>
+			<?php } ?>
+			<!-- <form action="queries.php" method="post" id="catform" onload="sub();">
 				<input type="hidden" name="cat" value="<?=$cat_name;?>">
-			</form>
+			</form> -->
 		<?php }	      	
 	}
 
 /*If the option entered by the user is to delete a comment to either a resolved query or an unresolved query and all inputs are available, perform the deletion operation on the database, checking for errors, displaying the appropriate error message, else redirecting to the original page after the operation.*/
 	
 	else if(!empty($_POST['com_id']) && $_POST['type']=='del_com') {
+		$cat_name=$_POST['cat'];
 	    $com_id=$_POST['com_id'];
 	    $query = "DELETE FROM comments WHERE com_id='$com_id'";
 		$result = mysqli_query($conn, $query);
@@ -184,15 +212,17 @@
 			<script> errordisp("No data available in database!");</script>
 		<?php }
 		else { ?>
-			<form action="queries.php" method="post" id="catform" onload="sub();">
+			<script>refresh("<?=$cat_name;?>");</script>
+			<!-- <form action="queries.php" method="post" id="catform" onload="sub();">
 				<input type="hidden" name="cat" value="<?=$cat_name;?>">
-			</form>
+			</form> -->
 		<?php }	      	
 	}
 
 /*If the option entered by the user is to delete either a resolved query or an unresolved query and all inputs are available, perform the deletion operation on the database, checking for errors, displaying the appropriate error message, else redirecting to the original page after the operation. Once a query is deleted, we must also delete all the child comments to prevent comments from being orphaned.*/
 	
 		else if(!empty($_POST['query_id']) && !empty($_POST['cat_id']) && $_POST['type']=='delq') {
+			$cat_name=$_POST['cat'];
 	    $query_id=$_POST['query_id'];
 	    $cat_id=$_POST['cat_id'];
 	    $query = "DELETE FROM queries WHERE cat_id='$cat_id' AND query_id='$query_id'";
@@ -207,22 +237,21 @@
 		<?php }
 		else {
 			$query2 = "DELETE FROM comments WHERE cat_id='$cat_id' AND query_id='$query_id'";
+			$result2 = mysqli_query($conn, $query2); 
+			$query2 = "SELECT file_name FROM files WHERE cat_id='$cat_id'";
 			$result2 = mysqli_query($conn, $query2);
-			$resa=mysqli_affected_rows($conn);
-			$resb=mysqli_error($conn);
-			if(!empty($resb)){ ?>
-				<script> errordisp("<?=$resb;?>");</script>
-			<?php }
-			else if(empty($resa)) { ?>
-				<script> errordisp("No data available in database!");</script>
-			<?php }
-			else { ?>
-				<form action="queries.php" method="post" id="catform" onload="sub();">
+			while($r = mysqli_fetch_assoc($result2)) { 
+				$filenm=$r['file_name'];
+				unlink('Files/'.$filenm);
+			}
+			$query2 = "DELETE FROM files WHERE cat_id='$cat_id'";
+			$result2 = mysqli_query($conn, $query2); ?>
+			<script>refresh("<?=$cat_name;?>");</script>
+				<!-- <form action="queries.php" method="post" id="catform" onload="sub();">
 					<input type="hidden" name="cat" value="<?=$cat_name;?>">
-				</form>
+				</form> -->
 			<?php }
 		}	      	
-	}
 ?>
 <!--Create a container to show form input elements to take in user inputs-->
 		<div class="container" id="admin-cont">
@@ -265,13 +294,13 @@
 								<h3 class="display text-center"><?=$cat_name;?></h3>
 								<br>
 		  						<?php
-		  						/*$i=0;*/
+		  						$i=0;
 /*Display problem header*/
-								while($row = mysqli_fetch_assoc($result)) { /*$i=$i+1;*/ ?>
+								while($row = mysqli_fetch_assoc($result)) { $i=$i+1; ?>
 									<div class="card" id="query">
 	  									<div class="card-body">
-	  										<ul id="unstyled-list"><!-- 
-			 									<li><span class="heading">PROBLEM <?php echo $i;?></span></li><br> -->
+	  										<ul id="unstyled-list">
+			 									<li><span class="heading">PROBLEM <?php echo $i;?></span></li><br>
 			 									<form action="queries.php" method="post">
 <!--Provide an option to delete the query by the click of a button-->
 													<div id="btngrp">
@@ -297,6 +326,11 @@
 													<button class="btn" type="button" data-toggle="collapse" data-target="#collapseExample<?=$row['query_id'].$cat_id.$_SESSION['ID'];?>" id="buttoncom">
 		    										View Comments	
 													</button>
+			    										<form action="files.php" method="post" style="display: inline;">
+															  	<input type="hidden" name="query_id" value="<?=$row['query_id'];?>">
+															  	<input type="submit" value="View Files" class="btn" type="button" id="buttoncom">
+														</form>
+													</button>
 													<form action="queries.php" method="post" enctype="multipart/form-data">
 														  		<br>
 																<input type="file" name="files[]" multiple="" />
@@ -308,7 +342,9 @@
 															  	<input type="hidden" name="type" value="file">
 															  	<input type="hidden" name="problem" value="<?=$row['query']?>">
 															  	<input type="hidden" name="cat_name" value="<?=$cat_name;?>">
+															  	<input type="hidden" name="cat_id" value="<?=$cat_id;?>">
 															</form>
+														<br>
 <!--The collapsible form which shows on clicking Edit Query and then submits the form to perform the function -->
 												<div class="collapse" id="collapseExample<?=$row['query_id'].$i;?>">
 													<form action="queries.php" method="post">
@@ -401,6 +437,10 @@
 													<button class="btn" type="button" data-toggle="collapse" data-target="#collapseExample<?=$row['query_id'].$cat_id.$_SESSION['ID'];?>" id="buttoncom">
 		    										View Comments	
 													</button>
+													<form action="files.php" method="post" style="display: inline;">
+															  	<input type="hidden" name="query_id" value="<?=$row['query_id'];?>">
+															  	<input type="submit" value="View Files" class="btn" type="button" id="buttoncom">
+														</form>
 													<form action="queries.php" method="post" enctype="multipart/form-data">
 														  		<br>
 																<input type="file" name="files[]" multiple="" />
@@ -412,6 +452,7 @@
 															  	<input type="hidden" name="type" value="file">
 															  	<input type="hidden" name="problem" value="<?=$row['query']?>">
 															  	<input type="hidden" name="cat_name" value="<?=$cat_name;?>">
+															  	<input type="hidden" name="cat_id" value="<?=$cat_id;?>">
 															</form>
 <!--The collapsible form which shows on clicking Edit Query and then submits the form to perform the function -->
 													<div class="collapse" id="collapseExample<?=$row['query_id'].$i;?>">

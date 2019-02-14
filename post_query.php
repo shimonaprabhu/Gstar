@@ -40,7 +40,7 @@
 						<script> errordisp("<?=$resb;?>");</script>
 					<?php }
 					else { 
-						if(isset($_FILES['files'])){
+						if(!(array_sum($_FILES['files']['error'])>0)){
 						foreach($_FILES['files']['tmp_name'] as $key => $tmp_name ){
 							$file_name = $_FILES['files']['name'][$key];
 							$file_size =$_FILES['files']['size'][$key];
@@ -50,7 +50,7 @@
 								$result = mysqli_query($conn, $query);
 								$row=mysqli_fetch_assoc($result);
 								$query_id=$row['query_id'];
-						        $query="INSERT into files VALUES('$query_id','$file_name','$file_size','$file_type')";
+						        $query="INSERT into files VALUES('$query_id','$cat_id','$file_name','$file_size','$file_type')";
 						        $result = mysqli_query($conn, $query);
 								$resb=mysqli_error($conn);
 								if(!empty($resb)){ ?>
@@ -59,11 +59,10 @@
 						        $desired_dir="Files";
 						        if(is_dir("$desired_dir/".$file_name)==false){
 						            move_uploaded_file($file_tmp,"Files/".$file_name);
-						        }else{
-						         //rename the file if another one exist
-						            $new_dir="user_data/".$file_name.time();
-						            rename($file_tmp,$new_dir) ;				
-						        }		
+						        }
+						        else { ?>
+									<script> errordisp("File already exists");</script>
+								<?php }		
 						    }
 						}
 /*Send notifications to all users using PHPMailer functionality. Select all the emails of the users from the database, set the subject and email body, and finally configure all the attributes of the PHPMailer object.*/
@@ -83,13 +82,14 @@
 						else {
 							while($row = mysqli_fetch_assoc($result)) { 
 								$mailto=$row['email'];
+								try {
 								$mail = new PHPMailer(true);
 								$mail ->IsSmtp();
 								$mail ->SMTPDebug = 0;
 								$mail ->SMTPAuth = true;
 								$mail ->SMTPSecure = 'ssl';
 								$mail ->Host = "smtp.gmail.com";
-								$mail ->Port = 465; // or 587
+								$mail ->Port = 465; 
 								$mail ->IsHTML(true);
 								$mail ->Username = "AttendancePortal123@gmail.com";
 								$mail ->Password = "attendanceportal1*";
@@ -97,12 +97,13 @@
 								$mail ->Subject = $mailSub;
 								$mail ->Body = $mailMsg;
 								$mail ->AddAddress($mailto);
-								if(!$mail->Send()) { ?>
-									<script> errordisp("Notifications was not sent!");</script>
-						 		<?php }
+							 	}
+							 	catch(phpmailerException $e) { ?> 
+							 		<script> errordisp('Some e-mail addresses may not be delivered due to incorrect email addresses or incorrect setup of mail server.');</script> 
+							 	<?php }
 						 		}
 						}?>
-						<script> location.replace("post_query.php"); </script>
+						<!-- <script> location.replace("post_query.php"); </script> -->
 					<?php }
 				  	}
 				else {
@@ -113,7 +114,8 @@
 						<script> errordisp("<?=$resb;?>");</script>
 					<?php }
 					else { 
-						if(isset($_FILES['files'])){
+						
+						if(!(array_sum($_FILES['files']['error'])>0)){
 						foreach($_FILES['files']['tmp_name'] as $key => $tmp_name ){
 							$file_name = $_FILES['files']['name'][$key];
 							$file_size =$_FILES['files']['size'][$key];
@@ -123,7 +125,7 @@
 								$result = mysqli_query($conn, $query);
 								$row=mysqli_fetch_assoc($result);
 								$query_id=$row['query_id'];
-						        $query="INSERT into files VALUES('$query_id','$file_name','$file_size','$file_type')";
+						        $query="INSERT into files VALUES('$query_id','$cat_id','$file_name','$file_size','$file_type')";
 						        $result = mysqli_query($conn, $query);
 								$resb=mysqli_error($conn);
 								if(!empty($resb)){ ?>
@@ -132,11 +134,10 @@
 						        $desired_dir="Files";
 						        if(is_dir("$desired_dir/".$file_name)==false){
 						            move_uploaded_file($file_tmp,"Files/".$file_name);
-						        }else{
-						         //rename the file if another one exist
-						            $new_dir="user_data/".$file_name.time();
-						            rename($file_tmp,$new_dir) ;				
-						        }		
+						        }
+						        else { ?>
+									<script> errordisp("File already exists");</script>
+								<?php }		
 						    }
 						}
 /*Send notifications to all users using PHPMailer functionality. Select all the emails of the users from the database, set the subject and email body, and finally configure all the attributes of the PHPMailer object.*/
@@ -155,6 +156,7 @@
 						<?php }
 						else {
 							while($row = mysqli_fetch_assoc($result)) { 
+								try {
 								$mailto=$row['email'];
 								$mail = new PHPMailer(true);
 								$mail ->IsSmtp();
@@ -170,11 +172,12 @@
 								$mail ->Subject = $mailSub;
 								$mail ->Body = $mailMsg;
 								$mail ->AddAddress($mailto);
-								if(!$mail->Send()) { ?>
-									<script> errordisp("Notifications was not sent!");</script>
-						 		<?php }
+								}
+							 	catch(phpmailerException $e) { ?> 
+							 		<script> errordisp('Some e-mail addresses may not be delivered due to incorrect email addresses or incorrect setup of mail server.');</script> 
+							 	<?php }
 						 		}
-						}?>
+						} ?>
 						<script> location.replace("post_query.php"); </script>
 					<?php }			  		
 					}
@@ -194,8 +197,8 @@
 			  			<h1 class="display text-center">Enter Details</h1>
 			  			<hr class="my-4">
 					  	<form action="post_query.php" method="post" enctype="multipart/form-data">
-					  		<label for="cat">Category</label>
-					  		<select name="cat" id="type" class="form-control">
+					  		<label for="cat">Category<span class="error">*</span></label>
+					  		<select required name="cat" id="type" class="form-control">
 					  			<option value="" disabled selected hidden>Options</option>
 <!-- Display all the categories as option menu -->
 								<?php
@@ -216,11 +219,14 @@
 									}
 					  			?>
 					  		</select>
-					  		<br><label for="problem">Problem:</label>
-							<textarea rows="10" cols="100" class="form-control" name="problem" placeholder="Enter the problem here"></textarea>
+					  		<br><label for="problem">Problem<span class="error">*</span></label>
+							<textarea required rows="10" cols="100" class="form-control" name="problem" placeholder="Enter the problem here"></textarea>
 							<br><label for="soln">Solution</label>
 						  	<textarea rows="10" cols="100" class="form-control" name="soln" placeholder="Enter the solution here"></textarea><br>
 							<input type="file" name="files[]" multiple="" />
+							<br>
+							<br>
+							<span class="error">* Required Fields</span>
 							<br>
 							<br>
 						   	<div id="btngrp">

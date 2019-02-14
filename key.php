@@ -13,8 +13,11 @@
 	$cat_id=$_POST['cat_id'];
 	$key=$_POST['search'];
 /*If the option entered by the user is to add a comment to a query and all inputs are available, perform the insertion operation on the database, checking for errors, displaying the appropriate error message, else redirecting to the original page after the operation.*/
-	if (isset($_FILES['files']) && $_POST['type']=='file') { $problem=$_POST['problem'];
-	$cat_name=$_POST['cat_name']; $key=$_POST['search']; $cat_id=$_POST['cat_id']; 
+	if (!empty($_FILES)&&!(array_sum($_FILES['files']['error'])>0) && $_POST['type']=='file') { 
+		$problem=$_POST['problem'];
+		$cat_name=$_POST['cat_name']; 
+		$key=$_POST['search']; 
+		$cat_id=$_POST['cat_id']; 
 		foreach($_FILES['files']['tmp_name'] as $index => $tmp_name ){
 					$file_name = $_FILES['files']['name'][$index];
 					$file_size =$_FILES['files']['size'][$index];
@@ -24,7 +27,10 @@
 						$result = mysqli_query($conn, $query);
 						$row=mysqli_fetch_assoc($result);
 						$query_id=$row['query_id'];
-				        $query="INSERT into files VALUES('$query_id','$file_name','$file_size','$file_type')";
+						echo $query_id;
+						echo $cat_id;
+				        $query="INSERT into files VALUES('$query_id','$cat_id','$file_name','$file_size','$file_type')";
+				        echo $query;
 				        $result = mysqli_query($conn, $query);
 						$resb=mysqli_error($conn);
 						if(!empty($resb)){ ?>
@@ -33,11 +39,10 @@
 				        $desired_dir="Files";
 				        if(is_dir("$desired_dir/".$file_name)==false){
 				            move_uploaded_file($file_tmp,"Files/".$file_name);
-				        }else{
-				         //rename the file if another one exist
-				            $new_dir="user_data/".$file_name.time();
-				            rename($file_tmp,$new_dir) ;				
-				        }		
+				        }
+				        else { ?>
+							<script> errordisp("File already exists");</script>
+						<?php }		
 				    } ?>
 		<form action="key.php" method="post" id="catform" onload="sub();">
 			<input type="hidden" name="cat" value="<?=$cat_name;?>">
@@ -112,7 +117,7 @@
 							}
 						}
 /*Check if any of the search terms in the string occur in any of the queries. If yes, the display the queries else display an appropriate message*/
-						$query="SELECT * FROM queries WHERE $construct AND cat_id='$cat_id'";
+						$query="SELECT * FROM queries WHERE ($construct) AND cat_id='$cat_id'";
 						$result= mysqli_query($conn, $query);
 						$resa=mysqli_affected_rows($conn);
 						$resb=mysqli_error($conn);
@@ -139,7 +144,7 @@
 <!--Display the Resolved query, the solution to it by looping over the result array and also provide collapsible buttons to view answer, view comments and post comments-->
 														<li><span class="heading">RESOLVED QUERY: </span><?=$row['query'];?></li><br>	
 						  								<button class="btn" type="button" data-toggle="collapse" data-target="#collapseExample<?=$row['query_id'];?>" id="button">
-    													View Answer	
+    													Answer	
 											  			</button>
 											  			<button class="btn" type="button" data-toggle="collapse" data-target="#collapseExample<?=$row['query_id'].$cat_id.$_SESSION['ID'];?>" id="buttoncom">
     													View Comments	
@@ -147,6 +152,10 @@
 											  			<button class="btn" type="button" data-toggle="collapse" data-target="#collapseExample<?=$row['query_id'].$cat_id;?>" id="buttoncom">
     													Add Comment	
 											  			</button>
+											  			<form action="files_reg.php" method="post" style="display: inline;">
+															  	<input type="hidden" name="query_id" value="<?=$row['query_id'];?>">
+															  	<input type="submit" value="View Files" class="btn" type="button" id="buttoncom">
+															</form>
 											  			<form action="key.php" method="post" enctype="multipart/form-data">
 														  		<br>
 																<input type="file" name="files[]" multiple="" />
@@ -254,6 +263,10 @@
 											  			<button class="btn" type="button" data-toggle="collapse" data-target="#collapseExample<?=$row['query_id'].$cat_id;?>" id="buttoncom">
     													Add Comment	
 											  			</button>
+											  			<form action="files_reg.php" method="post" style="display: inline;">
+															  	<input type="hidden" name="query_id" value="<?=$row['query_id'];?>">
+															  	<input type="submit" value="View Files" class="btn" type="button" id="buttoncom">
+															</form>
 											  			<form action="key.php" method="post" enctype="multipart/form-data">
 														  		<br>
 																<input type="file" name="files[]" multiple="" />

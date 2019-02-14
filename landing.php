@@ -3,7 +3,7 @@
 	if(!$_SESSION['ID'] || $_SESSION['type']!='regular') {  
   		header("Location: index.php");
   		$_SESSION['access']='error';
-	} 
+	}
 /*To maintain the logged in state, create the session and then check if the session exists in the database and if the privilege is admin*/
 
 /*Extract data posted using the form and include the files to make connection to the DB and also include script files. operror is used for displaying error messages*/	
@@ -12,10 +12,13 @@
 
 /*Include the files to enable mailing functionality to send notification to users on new query post*/
 	require_once('PHPMailer-master/PHPMailerAutoload.php');
-	$cat_name=$_POST['cat'];
+	$cat_name=$_SESSION['data'];
+	/*$cat_name=$_POST['cat'];*/
 /*If the option entered by the user is to add a comment to a query and all inputs are available, perform the insertion operation on the database, checking for errors, displaying the appropriate error message, else redirecting to the original page after the operation.*/
-	if (isset($_FILES['files']) && $_POST['type']=='file') { $problem=$_POST['problem'];
-	$cat_name=$_POST['cat_name'];
+	if (!empty($_FILES)&&!(array_sum($_FILES['files']['error'])>0) && $_POST['type']=='file') { 
+		$problem=$_POST['problem'];
+		$cat_name=$_POST['cat_name'];
+		$cat_id=$_POST['cat_id'];
 		foreach($_FILES['files']['tmp_name'] as $key => $tmp_name ){
 					$file_name = $_FILES['files']['name'][$key];
 					$file_size =$_FILES['files']['size'][$key];
@@ -25,7 +28,7 @@
 						$result = mysqli_query($conn, $query);
 						$row=mysqli_fetch_assoc($result);
 						$query_id=$row['query_id'];
-				        $query="INSERT into files VALUES('$query_id','$file_name','$file_size','$file_type')";
+				        $query="INSERT into files VALUES('$query_id','$cat_id','$file_name','$file_size','$file_type')";
 				        $result = mysqli_query($conn, $query);
 						$resb=mysqli_error($conn);
 						if(!empty($resb)){ ?>
@@ -34,15 +37,15 @@
 				        $desired_dir="Files";
 				        if(is_dir("$desired_dir/".$file_name)==false){
 				            move_uploaded_file($file_tmp,"Files/".$file_name);
-				        }else{
-				         //rename the file if another one exist
-				            $new_dir="user_data/".$file_name.time();
-				            rename($file_tmp,$new_dir) ;				
-				        }		
+				        }
+				        else { ?>
+							<script> errordisp("File already exists");</script>
+						<?php }		
 				    } ?>
-		<form action="landing.php" method="post" id="catform" onload="sub();">
+				   	<script>refresh("<?=$cat_name;?>");</script>
+		<!-- <form action="landing.php" method="post" id="catform" onload="sub();">
 			<input type="hidden" name="cat" value="<?=$cat_name;?>">
-		</form>
+		</form> -->
 	<?php }
 
 	else if (!empty($_POST['comment']) && $_POST['type']=='com') {
@@ -70,9 +73,10 @@
 				<script> errordisp("No data available in database!");</script>
 			<?php }
 			else { ?>
-				<form action="landing.php" method="post" id="catform" onload="sub();">
+				<script>refresh("<?=$cat_name;?>");</script>
+				<!-- <form action="landing.php" method="post" id="catform" onload="sub();">
 					<input type="hidden" name="cat" value="<?=$cat_name;?>">
-				</form>
+				</form> -->
 
 			<?php }
 		}
@@ -88,7 +92,7 @@
 			<script> errordisp("<?=$resb;?>");</script>
 		<?php }
 		else { 
-			if(isset($_FILES['files'])){
+			if(!(array_sum($_FILES['files']['error'])>0)){
 				foreach($_FILES['files']['tmp_name'] as $key => $tmp_name ){
 					$file_name = $_FILES['files']['name'][$key];
 					$file_size =$_FILES['files']['size'][$key];
@@ -98,7 +102,7 @@
 						$result = mysqli_query($conn, $query);
 						$row=mysqli_fetch_assoc($result);
 						$query_id=$row['query_id'];
-				        $query="INSERT into files VALUES('$query_id','$file_name','$file_size','$file_type')";
+				        $query="INSERT into files VALUES('$query_id','$cat_id','$file_name','$file_size','$file_type')";
 				        $result = mysqli_query($conn, $query);
 						$resb=mysqli_error($conn);
 						if(!empty($resb)){ ?>
@@ -107,10 +111,10 @@
 				        $desired_dir="Files";
 				        if(is_dir("$desired_dir/".$file_name)==false){
 				            move_uploaded_file($file_tmp,"Files/".$file_name);
-				        }else{
-				         //rename the file if another one exist
-				            $new_dir="user_data/".$file_name.time();
-				            rename($file_tmp,$new_dir) ;				
+				        }
+				        else { ?>
+							<script> errordisp("File already exists");</script>
+						<?php			
 				        }		
 				    }
 				}
@@ -141,6 +145,7 @@
 					<?php }
 					else {
 						while($row = mysqli_fetch_assoc($result)) { 
+							try {
 							$mailto=$row['email'];
 							$mail = new PHPMailer(true);
 							$mail ->IsSmtp();
@@ -156,19 +161,22 @@
 							$mail ->Subject = $mailSub;
 							$mail ->Body = $mailMsg;
 							$mail ->AddAddress($mailto);
-							if(!$mail->Send()) { ?>
-								<script> errordisp("Notifications was not sent!");</script>
-					 		<?php }
+							}
+							 	catch(phpmailerException $e) { ?> 
+							 		<script> errordisp('Some e-mail addresses may not be delivered due to incorrect email addresses or incorrect setup of mail server.');</script> 
+							 	<?php }
 					 		}
-					}?>
-				<form action="landing.php" method="post" id="catform" onload="sub();">
+					} ?>
+					<script>refresh("<?=$cat_name;?>");</script>
+				<!-- <form action="landing.php" method="post" id="catform" onload="sub();">
 					<input type="hidden" name="cat" value="<?=$cat_name;?>">
-				</form>
+				</form> -->
 			<?php }
 		}
 	}
 /*If the option entered by the user is to delete a comment to a query and all inputs are available, perform the deletion operation on the database, checking for errors, displaying the appropriate error message, else redirecting to the original page after the operation.*/
 	else if(!empty($_POST['com_id']) && $_POST['type']=='del_com') {
+		$cat_name=$_POST['cat'];
 	    $com_id=$_POST['com_id'];
 	    $query = "DELETE FROM comments WHERE com_id='$com_id'";
 		$result = mysqli_query($conn, $query);
@@ -181,9 +189,10 @@
 			<script> errordisp("No data available in database!");</script>
 		<?php }
 		else { ?>
-			<form action="landing.php" method="post" id="catform" onload="sub();">
+			<script>refresh("<?=$cat_name;?>");</script>
+			<!-- <form action="landing.php" method="post" id="catform" onload="sub();">
 				<input type="hidden" name="cat" value="<?=$cat_name;?>">
-			</form>
+			</form> -->
 		<?php }	      	
 	}
 
@@ -285,7 +294,7 @@
 <!--Display the Resolved query, the solution to it by looping over the result array and also provide collapsible buttons to edit query, edit answer and view comments-->
 															<li><span class="heading">RESOLVED QUERY: </span><?=$row['query'];?></li><br>	
 							  								<button class="btn" type="button" data-toggle="collapse" data-target="#collapseExample<?=$row['query_id'];?>" id="button">
-	    													View Answer	
+	    													Answer	
 												  			</button>
 												  			<button class="btn" type="button" data-toggle="collapse" data-target="#collapseExample<?=$row['query_id'].$cat_id.$_SESSION['ID'];?>" id="buttoncom">
 	    													View Comments	
@@ -293,6 +302,10 @@
 												  			<button class="btn" type="button" data-toggle="collapse" data-target="#collapseExample<?=$row['query_id'].$cat_id;?>" id="buttoncom">
 	    													Add Comment	
 												  			</button>
+												  			<form action="files_reg.php" method="post" style="display: inline;">
+															  	<input type="hidden" name="query_id" value="<?=$row['query_id'];?>">
+															  	<input type="submit" value="View Files" class="btn" type="button" id="buttoncom">
+															</form>
 															<form action="landing.php" method="post" enctype="multipart/form-data">
 														  		<br>
 																<input type="file" name="files[]" multiple="" />
@@ -304,6 +317,7 @@
 															  	<input type="hidden" name="type" value="file">
 															  	<input type="hidden" name="problem" value="<?=$row['query']?>">
 															  	<input type="hidden" name="cat_name" value="<?=$cat_name;?>">
+																<input type="hidden" name="cat_id" value="<?=$cat_id;?>">
 															</form>
 <!--The collapsible content which shows on clicking View Answer-->
 															<div class="collapse" id="collapseExample<?=$row['query_id'];?>">
@@ -395,6 +409,10 @@
 												  			<button class="btn" type="button" data-toggle="collapse" data-target="#collapseExample<?=$row['query_id'].$cat_id;?>" id="buttoncom">
 	    													Add Comment	
 												  			</button>
+												  			<form action="files_reg.php" method="post" style="display: inline;">
+															  	<input type="hidden" name="query_id" value="<?=$row['query_id'];?>">
+															  	<input type="submit" value="View Files" class="btn" type="button" id="buttoncom">
+															</form>
 												  			<form action="landing.php" method="post" enctype="multipart/form-data">
 														  		<br>
 																<input type="file" name="files[]" multiple="" />
@@ -406,6 +424,7 @@
 															  	<input type="hidden" name="type" value="file">
 															  	<input type="hidden" name="problem" value="<?=$row['query']?>">
 															  	<input type="hidden" name="cat_name" value="<?=$cat_name;?>">
+															  	<input type="hidden" name="cat_id" value="<?=$cat_id;?>">
 															</form>
 <!--The collapsible content which shows on clicking View comments-->
 															<div class="collapse" id="collapseExample<?=$row['query_id'].$cat_id.$_SESSION['ID'];?>">

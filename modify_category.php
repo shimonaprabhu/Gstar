@@ -45,13 +45,18 @@
 					  	<form action="modify_category.php" method="post">
 							<div class="form-row" id="form-center">
 						  		<div class="form-group col-lg-12">
-						    		<label for="InputCategory">Existing Category Name</label>
-						    		<input type="text" class="form-control" name="InputCategory" placeholder="Old Category">
+						    		<label for="InputCategory">Existing Category Name<span class="error">*</span></label>
+						    		<input required type="text" class="form-control" name="InputCategory" placeholder="Old Category">
 						    		<br>
-						    		<label for="OutputCategory">New Category Name</label>
-						    		<input type="text" class="form-control" name="OutputCategory" placeholder="New Category">
+						    		<label for="OutputCategory">New Category Name<span class="error">*</span></label>
+						    		<input required type="text" class="form-control" name="OutputCategory" placeholder="New Category">
 						  		</div>
 						  	</div>
+						  	<br>
+							<br>
+							<span class="error">* Required Fields</span>
+							<br>
+							<br>
 						   	<div id="btngrp">
 							  <input type="submit" value="Submit" class="btn justify-content-center" id="button">
 						  	</div>

@@ -12,7 +12,7 @@
 #buttoncom {
 	background-color: rgba(55,55,55,0.5);
 	color: rgba(244,244,244,1.0);
-	margin-left: 10%;
+	margin-left: 6%;
 }
 
 #main{
@@ -31,14 +31,17 @@
 	background-color: rgba(136,136,136 ,0.5);
 	padding: 10px;
 	margin-top: 3%;	
+	justify-content: center;
 }
 
 #detailsmain{
 	display: inline-block;
-	min-width: 75%;
+	min-width: 90%;
+	max-width: 90%;
     color: rgba(244,244,244,1.0);
 	background-color: rgba(136,136,136 ,0.5);
 	margin-top: 5%;	
+	justify-content: center;
 }
 
 #form-center{
@@ -58,6 +61,8 @@
 	height: 100%;
 	position: fixed;
 	padding-top: 2%;
+	width: 15%;
+	overflow: scroll;
 }
 
 #delbutton{
@@ -112,6 +117,10 @@
 	color: white;
 }
 
+#menu{
+	max-height: 50px; 
+	overflow-y: scroll;
+}
 
 #verified{
 	color: white;
@@ -163,6 +172,10 @@
 
 .heading{
 	font-weight: bold;
+}
+
+.error{
+	color:rgba(255,0,0,1.0);
 }
 
 td,th{
